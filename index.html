@@ -506,13 +506,31 @@
         wxPill.style.display = "inline-block";
         wxPill.className = `wx-pill ${metar.fltCat}`;
         wxPill.textContent = `${metar.station} · ${metar.fltCat}`;
+
+        const wxApt = byCode.get(metar.station.toUpperCase());
+        const wxPlace = wxApt?.city || shortAirportName(wxApt, metar.station);
+        const wxPlain = {
+          VFR: "clear weather",
+          MVFR: "a bit hazy, still flyable",
+          IFR: "classic PNW soup",
+          LIFR: "basically inside a cloud",
+        }[metar.fltCat] || metar.fltCat;
+
+        let wxNote = document.getElementById("wxNote");
+        if (!wxNote) {
+          wxNote = document.createElement("span");
+          wxNote.id = "wxNote";
+          wxNote.className = "meta-hint";
+          wxNote.style.marginTop = "0";
+          wxPill.insertAdjacentElement("afterend", wxNote);
+        }
+        wxNote.textContent = `(pilot-speak for ${wxPlace}, ${wxPlain})`;
+
         const bits = [metar.fltCat];
         if (metar.tempF !== null) bits.push(`${metar.tempF}°F`);
         if (metar.wind) bits.push(metar.wind);
         document.getElementById("areaWx").textContent =
           bits.join(" · ") + (metar.note ? ` (${metar.station})` : "");
-      } else {
-        document.getElementById("areaWx").textContent = "Live METAR on Netlify";
       }
 
       const quips = buildQuips({
@@ -584,10 +602,34 @@
       document.getElementById("statHours").textContent = `${(totalMin / 60).toFixed(1)} hrs`;
 
       const map = L.map("map", { scrollWheelZoom: false });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        attribution: "&copy; OpenStreetMap &copy; CARTO",
-        maxZoom: 18,
-      }).addTo(map);
+
+      const topo = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles &copy; Esri", maxZoom: 18 }
+      );
+
+      const vfrSectional = L.tileLayer(
+        "https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "FAA VFR Sectional via ArcGIS", maxNativeZoom: 12, maxZoom: 18 }
+      );
+
+      const lightGray = L.layerGroup([
+        L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+          { attribution: "Tiles &copy; Esri", maxZoom: 16 }
+        ),
+        L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 16 }
+        ),
+      ]);
+
+      topo.addTo(map);
+      L.control.layers(
+        { "Topo Map": topo, "VFR Sectional": vfrSectional, "Light Gray": lightGray },
+        null,
+        { position: "topright" }
+      ).addTo(map);
 
       const bounds = [];
 
