@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Where's Taylor? — N1763W Live Flight Log</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --card: #ffffff;
+      --ink: #17202a;
+      --muted: #5c6773;
+      --line: #e4e0d8;
+      --sky: #1d5fa7;
+      --green: #0f766e;
+      --red: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 28px 18px 56px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .tail-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+      padding: 3px 9px;
+      border-radius: 3px;
+      letter-spacing: 0.08em;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(23, 32, 42, 0.06);
+    }
+    .hero-photo {
+      position: relative;
+      min-height: 320px;
+      background: #1e293b;
+    }
+    .hero-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
+      display: block;
+    }
+    .photo-caption {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      background: rgba(15, 23, 42, 0.84);
+      color: #f6f4ef;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      padding: 4px 8px;
+      border-radius: 3px;
+    }
+    .hero-body {
+      padding: 26px 26px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .pill-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .status-pill {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      background: #141a21;
+      border: 1px solid #2b3642;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .status-pill.parked { color: #f5b942; }
+    .status-pill.airborne { color: #4ade80; }
+    .wx-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
+      border-radius: 3px;
+      border: 1.5px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+    }
+    .wx-pill.MVFR { border-color: #1d5fa7; color: #1d5fa7; }
+    .wx-pill.IFR, .wx-pill.LIFR { border-color: #b91c1c; color: #b91c1c; }
+    .wx-pill.VFR { border-color: #0f766e; color: #0f766e; }
+    h2.headline {
+      font-size: 1.6rem;
+      line-height: 1.2;
+      margin: 10px 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .quip {
+      font-size: 1.02rem;
+      color: #2c3744;
+      margin: 0;
+      padding: 12px 14px;
+      background: var(--bg);
+      border-left: 3px solid var(--sky);
+      border-radius: 6px;
+    }
+    .live-meta {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 0.84rem;
+    }
+    .meta-label { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .meta-val { font-weight: 600; }
+    .meta-hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .stat-num {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .panel-head h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .stamps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .stamp {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 3px;
+      border: 1px dashed #94a3b8;
+      background: #f8fafc;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .stamp:hover { border-color: var(--sky); color: var(--sky); }
+    #map {
+      height: 410px;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th {
+      text-align: left;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #f0ede7;
+    }
+    tr:last-child td { border-bottom: none; }
+    .route-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      color: var(--sky);
+    }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 26px;
+    }
+    footer a { color: var(--sky); text-decoration: none; }
+
+    @media (max-width: 780px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-photo { min-height: 260px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 class="brand">Where's Taylor?</h1>
+      <span class="tail-tag">N1763W · '73 BEECH A36 BONANZA</span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-photo">
+        <img src="public/images/taylor.png" alt="Taylor pushing N1763W by the towbar" />
+        <span class="photo-caption">PREFLIGHT TOWBAR WORKOUT · N1763W</span>
+      </div>
+      <div class="hero-body">
+        <div>
+          <div class="pill-row">
+            <span id="statusPill" class="status-pill parked">CHECKING</span>
+            <span id="wxPill" class="wx-pill" style="display:none"></span>
+          </div>
+          <h2 id="headline" class="headline">Locating N1763W…</h2>
+          <p id="quip" class="quip">Tuning 122.8 and squinting at the ADS-B feed…</p>
+          <div id="liveMeta" class="live-meta">Checking live ADS-B…</div>
+        </div>
+        <div class="meta-grid">
+          <div>
+            <div class="meta-label">Last Touchdown</div>
+            <div id="lastTouchdown" class="meta-val">—</div>
+          </div>
+          <div>
+            <div class="meta-label">Most Recent Leg</div>
+            <div id="lastLeg" class="meta-val">—</div>
+            <div id="lastLegHint" class="meta-hint"></div>
+          </div>
+          <div>
+            <div class="meta-label">Area Weather</div>
+            <div id="areaWx" class="meta-val">—</div>
+          </div>
+          <div>
+            <div class="meta-label">Aircraft</div>
+            <div class="meta-val">Beech A36 · IO-520</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div id="statHome" class="stat-num">S50</div>
+        <div class="stat-label">Home Drome (Auburn, WA)</div>
+      </div>
+      <div class="stat">
+        <div id="statAirports" class="stat-num">—</div>
+        <div class="stat-label">Airports Logged</div>
+      </div>
+      <div class="stat">
+        <div id="statNm" class="stat-num">—</div>
+        <div class="stat-label">Nautical Miles Logged</div>
+      </div>
+      <div class="stat">
+        <div id="statHours" class="stat-num">—</div>
+        <div class="stat-label">Flight Time Logged</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3>PNW Flight Map</h3>
+        <div id="stamps" class="stamps"></div>
+      </div>
+      <div id="map"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Recent Logbook</h3>
+        <span style="font-size:0.8rem;color:var(--muted)">Times in Pacific Time (PT)</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date (PT)</th>
+            <th>Route</th>
+            <th>Airports</th>
+            <th>Time</th>
+            <th>Dist</th>
+          </tr>
+        </thead>
+        <tbody id="logbookBody"></tbody>
+      </table>
+    </section>
+
+    <footer>
+      Public ADS-B via <a href="https://adsb.lol" target="_blank" rel="noreferrer">adsb.lol</a> (ODbL) &amp;
+      <a href="https://adsb.fi" target="_blank" rel="noreferrer">adsb.fi</a> · Weather via NOAA Aviation Weather ·
+      Airports via OurAirports · Built by a fellow airplane guy.
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const PT_FMT = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      weekday: "short", month: "short", day: "numeric",
+      hour: "numeric", minute: "2-digit",
+    });
+
+    function haversineNm(lat1, lon1, lat2, lon2) {
+      const toRad = (d) => (d * Math.PI) / 180;
+      const R = 3440.065;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    function shortAirportName(a, fallbackCode) {
+      if (!a) return fallbackCode;
+      return a.name.replace(/\s+Airport$/i, "").replace(/\s+Municipal$/i, " Muni");
+    }
+
+    function buildQuips({ live, metar, lastAirportObj, lastCode, homeCode, daysAgo, hoursAgo }) {
+      const place = `${shortAirportName(lastAirportObj, lastCode)} (${lastCode})`;
+      const atHome = lastCode.toUpperCase() === homeCode.toUpperCase();
+
+      if (live && live.airborne) {
+        const alt = live.alt_ft ? `${live.alt_ft.toLocaleString()} ft` : "pattern altitude";
+        const gs = live.gs_kt ? `${live.gs_kt} kt GS` : "cruise speed";
+        const sq = live.squawk ? `Squawking ${live.squawk}` : "Transponder singing";
+        if (live.vrate_fpm > 300) {
+          return [
+            `Wheels in the wells — climbing through ${alt} at ${gs}. Bonanza doing Bonanza things.`,
+            `Gear up, flaps up, burning 100LL. Passing ${alt} at ${gs}.`,
+          ];
+        }
+        if (live.vrate_fpm < -300) {
+          return [
+            `GUMPS check time — descending through ${alt} at ${gs}. Three green, Taylor.`,
+            `Pulling the power back through ${alt}. Somebody's about to grease a landing (or bounce twice).`,
+          ];
+        }
+        return [
+          `Autopilot on at ${alt} and ${gs} — almost certainly chasing a $100 hamburger.`,
+          `${sq}, cruising at ${alt} (${gs}). Definitely beating I-5 traffic.`,
+          `Six cylinders of IO-520 humming at ${alt}. Don't ask what avgas costs right now.`,
+        ];
+      }
+
+      const list = [];
+      if (hoursAgo < 3) {
+        list.push(
+          atHome
+            ? `Just pushed back into the hangar at ${place}. Towbar cardio complete.`
+            : `Engine's still ticking on the transient ramp at ${place} — probably walking to lunch.`
+        );
+      }
+      if (metar && ["IFR", "LIFR", "MVFR"].includes(metar.fltCat)) {
+        list.push(`Hangar door's staying shut at ${place}. Marine layer's winning today (${metar.fltCat} at ${metar.station}).`);
+        list.push(`Ceiling's low (${metar.fltCat}) and the coffee's hot. Smart call staying dry.`);
+      } else if (metar && metar.fltCat === "VFR") {
+        list.push(
+          atHome
+            ? `Clear VFR at ${metar.station} and the Bonanza's still in the hangar? Questionable life choices.`
+            : `Tied down at ${place} in clear VFR — either grabbing a $100 hamburger or stuck waiting for a ride.`
+        );
+      }
+      if (daysAgo >= 5) {
+        list.push(`Quiet on ADS-B for ${daysAgo} days — somebody check if the Bonanza's in annual.`);
+      }
+      if (atHome) {
+        list.push(
+          `Tucked in the hangar at ${place}, safely out of the PNW rain while the ramp Cessnas get wet.`,
+          `Master switch off, hangar door down at ${place}. Waiting for the next excuse to fly to Orcas.`,
+          `Resting in the hangar at ${place} after a tough week of burning 100LL.`
+        );
+      } else {
+        list.push(
+          `Chocked & tied down on the transient ramp at ${place}. Definitely NOT coming home via I-5.`,
+          `Master switch off at ${place}. Hangar flying until the trip home.`
+        );
+      }
+      return list;
+    }
+
+    async function init() {
+      const [flightsRes, airportsRes] = await Promise.all([
+        fetch("data/flights.json"),
+        fetch("data/airports.json"),
+      ]);
+      const data = await flightsRes.json();
+      const airportsList = await airportsRes.json();
+
+      const byCode = new Map();
+      for (const a of airportsList) {
+        byCode.set(a.code.toUpperCase(), a);
+        byCode.set(a.ident.toUpperCase(), a);
+      }
+
+      const lastCode = data.state.last_airport;
+      const lastAirportObj = byCode.get(lastCode.toUpperCase());
+      const atHome = lastCode.toUpperCase() === data.aircraft.home.toUpperCase();
+
+      let liveResp = null;
+      try {
+        const res = await fetch(`/.netlify/functions/live?airport=${encodeURIComponent(lastCode)}`);
+        if (res.ok) liveResp = await res.json();
+      } catch {}
+
+      const live = liveResp ? liveResp.live : { airborne: false };
+      const metar = liveResp ? liveResp.metar : null;
+
+      const lastDate = new Date(data.state.last_seen_utc);
+      const hoursAgo = (Date.now() - lastDate.getTime()) / 36e5;
+      const daysAgo = Math.floor(hoursAgo / 24);
+
+      const pill = document.getElementById("statusPill");
+      const headline = document.getElementById("headline");
+      if (live.airborne) {
+        pill.className = "status-pill airborne";
+        pill.textContent = "In the air";
+        const parts = [];
+        if (live.alt_ft) parts.push(`${live.alt_ft.toLocaleString()} ft`);
+        if (live.gs_kt) parts.push(`${live.gs_kt} kt GS`);
+        if (live.track !== null) parts.push(`HDG ${String(live.track).padStart(3, "0")}°`);
+        headline.textContent = parts.length ? parts.join(" · ") : "N1763W is airborne right now!";
+      } else {
+        pill.className = "status-pill parked";
+        pill.textContent = atHome ? "Hangared" : "Tied down";
+        headline.textContent = `${atHome ? "In the hangar" : "Parked"} at ${shortAirportName(lastAirportObj, lastCode)} (${lastCode})`;
+      }
+
+      if (metar) {
+        const wxPill = document.getElementById("wxPill");
+        wxPill.style.display = "inline-block";
+        wxPill.className = `wx-pill ${metar.fltCat}`;
+        wxPill.textContent = `${metar.station} · ${metar.fltCat}`;
+        const bits = [metar.fltCat];
+        if (metar.tempF !== null) bits.push(`${metar.tempF}°F`);
+        if (metar.wind) bits.push(metar.wind);
+        document.getElementById("areaWx").textContent =
+          bits.join(" · ") + (metar.note ? ` (${metar.station})` : "");
+      } else {
+        document.getElementById("areaWx").textContent = "Live METAR on Netlify";
+      }
+
+      const quips = buildQuips({
+        live, metar, lastAirportObj, lastCode,
+        homeCode: data.aircraft.home, daysAgo, hoursAgo,
+      });
+      const prevQuip = sessionStorage.getItem("wt_last_quip");
+      const pool = quips.length > 1 ? quips.filter((q) => q !== prevQuip) : quips;
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      sessionStorage.setItem("wt_last_quip", chosen);
+      document.getElementById("quip").textContent = chosen;
+
+      document.getElementById("liveMeta").textContent = liveResp
+        ? `ADS-B via ${liveResp.source} · checked ${PT_FMT.format(new Date(liveResp.checked_utc))} PT`
+        : "Local preview · live ADS-B & METAR activate on Netlify";
+
+      document.getElementById("lastTouchdown").textContent = `${PT_FMT.format(lastDate)} PT`;
+
+      const newest = data.flights[0];
+      if (newest) {
+        document.getElementById("lastLeg").textContent =
+          `${newest.origin} → ${newest.destination} (${newest.duration_min} min)`;
+
+        const fmtApt = (code) => {
+          const a = byCode.get(code.toUpperCase());
+          if (!a) return code;
+          const loc = [a.city, a.region].filter(Boolean).join(", ");
+          return `${shortAirportName(a, code)}${loc ? ` (${loc})` : ""}`;
+        };
+
+        const hintEl = document.getElementById("lastLegHint");
+        if (newest.origin.toUpperCase() === newest.destination.toUpperCase()) {
+          hintEl.textContent =
+            `Where the heck is ${newest.origin}? Yeah, we didn't know either. It's actually ${fmtApt(newest.origin)} — just a local loop.`;
+        } else {
+          hintEl.textContent =
+            `Where the heck are ${newest.origin} and ${newest.destination}? Yeah, we didn't know either. That's ${fmtApt(newest.origin)} to ${fmtApt(newest.destination)}.`;
+        }
+      }
+
+      const visitedCodes = new Set();
+      let totalNm = 0;
+      let totalMin = 0;
+      const tbody = document.getElementById("logbookBody");
+
+      data.flights.forEach((f) => {
+        visitedCodes.add(f.origin);
+        visitedCodes.add(f.destination);
+        totalMin += f.duration_min || 0;
+        const o = byCode.get(f.origin.toUpperCase());
+        const d = byCode.get(f.destination.toUpperCase());
+        const isLocal = f.origin === f.destination;
+        const nm = !isLocal && o && d ? haversineNm(o.lat, o.lon, d.lat, d.lon) : 0;
+        totalNm += nm;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${PT_FMT.format(new Date(f.takeoff_utc))}</td>
+          <td class="route-code">${f.origin} → ${f.destination}</td>
+          <td>${isLocal ? `${shortAirportName(o, f.origin)} (local flight)` : `${shortAirportName(o, f.origin)} → ${shortAirportName(d, f.destination)}`}</td>
+          <td>${f.duration_min} min</td>
+          <td>${isLocal ? "Local" : `${nm} NM`}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("statAirports").textContent = visitedCodes.size;
+      document.getElementById("statNm").textContent = `${totalNm} NM`;
+      document.getElementById("statHours").textContent = `${(totalMin / 60).toFixed(1)} hrs`;
+
+      const map = L.map("map", { scrollWheelZoom: false });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap &copy; CARTO",
+        maxZoom: 18,
+      }).addTo(map);
+
+      const bounds = [];
+
+      [...data.flights].reverse().forEach((f, idx, arr) => {
+        if (f.origin === f.destination) return;
+        const o = byCode.get(f.origin.toUpperCase());
+        const d = byCode.get(f.destination.toUpperCase());
+        if (!o || !d) return;
+        const isNewest = idx === arr.length - 1;
+        L.polyline([[o.lat, o.lon], [d.lat, d.lon]], {
+          color: isNewest ? "#1d5fa7" : "#64748b",
+          weight: isNewest ? 3.5 : 2,
+          opacity: isNewest ? 0.9 : 0.45,
+          dashArray: isNewest ? null : "6 6",
+        }).addTo(map);
+      });
+
+      const stampsEl = document.getElementById("stamps");
+      visitedCodes.forEach((code) => {
+        const a = byCode.get(code.toUpperCase());
+        if (!a) return;
+        bounds.push([a.lat, a.lon]);
+        const isCurrent = !live.airborne && code.toUpperCase() === lastCode.toUpperCase();
+        const marker = L.circleMarker([a.lat, a.lon], {
+          radius: isCurrent ? 9 : 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: isCurrent ? "#d97706" : "#1d5fa7",
+          fillOpacity: 1,
+        })
+          .addTo(map)
+          .bindPopup(
+            `<strong>${code} · ${shortAirportName(a, code)}</strong><br>${a.city}, ${a.region}` +
+            (isCurrent ? `<br><em>${atHome ? "In the hangar here" : "Last seen parked here"}</em>` : "")
+          );
+
+        const btn = document.createElement("button");
+        btn.className = "stamp";
+        btn.textContent = code;
+        btn.title = `${shortAirportName(a, code)} (${a.city}, ${a.region})`;
+        btn.addEventListener("click", () => {
+          map.setView([a.lat, a.lon], 10);
+          marker.openPopup();
+        });
+        stampsEl.appendChild(btn);
+      });
+
+      if (live.airborne && live.lat && live.lon) {
+        bounds.push([live.lat, live.lon]);
+        const planeIcon = L.divIcon({
+          className: "",
+          html: `<div style="font-size:24px;transform:rotate(${(live.track || 0) - 45}deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">✈️</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        });
+        L.marker([live.lat, live.lon], { icon: planeIcon })
+          .addTo(map)
+          .bindPopup(
+            `<strong>N1763W — Live</strong><br>${live.alt_ft ?? "?"} ft · ${live.gs_kt ?? "?"} kt GS`
+          )
+          .openPopup();
+      }
+
+      if (bounds.length) {
+        map.fitBounds(bounds, { padding: [45, 45] });
+      } else {
+        map.setView([47.5, -122.3], 7);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

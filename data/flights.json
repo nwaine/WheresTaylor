@@ -1,0 +1,73 @@
+{
+  "aircraft": {
+    "tail": "N1763W",
+    "hex": "a1324d",
+    "model": "1973 Beechcraft A36 Bonanza",
+    "home": "S50"
+  },
+  "state": {
+    "airborne": false,
+    "last_seen_utc": "2026-11-22T00:54:00Z",
+    "last_airport": "S50",
+    "last_lat": 47.3201,
+    "last_lon": -122.2265
+  },
+  "flights": [
+    {
+      "id": "2026-11-22T0039Z-KPWT-S50",
+      "origin": "KPWT",
+      "destination": "S50",
+      "takeoff_utc": "2026-11-22T00:39:00Z",
+      "landing_utc": "2026-11-22T00:54:00Z",
+      "duration_min": 15
+    },
+    {
+      "id": "2026-11-21T2348Z-KORS-KPWT",
+      "origin": "KORS",
+      "destination": "KPWT",
+      "takeoff_utc": "2026-11-21T23:48:00Z",
+      "landing_utc": "2026-11-22T00:24:00Z",
+      "duration_min": 36
+    },
+    {
+      "id": "2026-11-21T2149Z-KPWT-KORS",
+      "origin": "KPWT",
+      "destination": "KORS",
+      "takeoff_utc": "2026-11-21T21:49:00Z",
+      "landing_utc": "2026-11-21T22:17:00Z",
+      "duration_min": 28
+    },
+    {
+      "id": "2026-11-21T1942Z-S50-KPWT",
+      "origin": "S50",
+      "destination": "KPWT",
+      "takeoff_utc": "2026-11-21T19:42:00Z",
+      "landing_utc": "2026-11-21T19:56:00Z",
+      "duration_min": 14
+    },
+    {
+      "id": "2026-11-21T1839Z-S50-S50",
+      "origin": "S50",
+      "destination": "S50",
+      "takeoff_utc": "2026-11-21T18:39:00Z",
+      "landing_utc": "2026-11-21T19:14:00Z",
+      "duration_min": 35
+    },
+    {
+      "id": "2026-11-20T2235Z-S50-S50",
+      "origin": "S50",
+      "destination": "S50",
+      "takeoff_utc": "2026-11-20T22:35:00Z",
+      "landing_utc": "2026-11-20T23:00:00Z",
+      "duration_min": 25
+    },
+    {
+      "id": "2026-11-14T2348Z-KDLS-S50",
+      "origin": "KDLS",
+      "destination": "S50",
+      "takeoff_utc": "2026-11-14T23:48:00Z",
+      "landing_utc": "2026-11-15T00:46:00Z",
+      "duration_min": 58
+    }
+  ]
+}
