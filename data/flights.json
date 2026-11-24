@@ -70,22 +70,6 @@
       "duration_min": 58
     },
     {
-      "id": "2026-10-11T2113Z-S50-7OR6",
-      "origin": "S50",
-      "destination": "7OR6",
-      "takeoff_utc": "2026-10-11T21:13:16Z",
-      "landing_utc": "2026-10-11T22:11:30Z",
-      "duration_min": 58
-    },
-    {
-      "id": "2026-10-06T1656Z-KSTS-95OR",
-      "origin": "KSTS",
-      "destination": "95OR",
-      "takeoff_utc": "2026-10-06T16:56:46Z",
-      "landing_utc": "2026-10-06T18:55:35Z",
-      "duration_min": 119
-    },
-    {
       "id": "2026-10-03T1705Z-KOAR-KSTS",
       "origin": "KOAR",
       "destination": "KSTS",
@@ -100,14 +84,6 @@
       "takeoff_utc": "2026-09-30T21:52:15Z",
       "landing_utc": "2026-09-30T23:37:01Z",
       "duration_min": 105
-    },
-    {
-      "id": "2026-09-30T1819Z-S50-CA09",
-      "origin": "S50",
-      "destination": "CA09",
-      "takeoff_utc": "2026-09-30T18:19:52Z",
-      "landing_utc": "2026-09-30T20:28:44Z",
-      "duration_min": 129
     },
     {
       "id": "2026-09-29T0300Z-S50-S50",
@@ -150,22 +126,6 @@
       "duration_min": 33
     },
     {
-      "id": "2026-09-26T2132Z-89WA-S50",
-      "origin": "89WA",
-      "destination": "S50",
-      "takeoff_utc": "2026-09-26T21:32:00Z",
-      "landing_utc": "2026-09-26T22:02:23Z",
-      "duration_min": 30
-    },
-    {
-      "id": "2026-09-26T2047Z-S50-89WA",
-      "origin": "S50",
-      "destination": "89WA",
-      "takeoff_utc": "2026-09-26T20:47:02Z",
-      "landing_utc": "2026-09-26T21:14:57Z",
-      "duration_min": 28
-    },
-    {
       "id": "2026-09-26T1812Z-KORS-S50",
       "origin": "KORS",
       "destination": "S50",
@@ -180,22 +140,6 @@
       "takeoff_utc": "2026-09-26T16:07:21Z",
       "landing_utc": "2026-09-26T16:44:23Z",
       "duration_min": 37
-    },
-    {
-      "id": "2026-09-20T2122Z-61WA-S50",
-      "origin": "61WA",
-      "destination": "S50",
-      "takeoff_utc": "2026-09-20T21:22:10Z",
-      "landing_utc": "2026-09-20T22:00:39Z",
-      "duration_min": 38
-    },
-    {
-      "id": "2026-09-19T1919Z-S50-61WA",
-      "origin": "S50",
-      "destination": "61WA",
-      "takeoff_utc": "2026-09-19T19:19:10Z",
-      "landing_utc": "2026-09-19T19:53:46Z",
-      "duration_min": 35
     },
     {
       "id": "2026-09-15T2357Z-K3S8-S50",
@@ -238,14 +182,6 @@
       "duration_min": 53
     },
     {
-      "id": "2026-08-28T2234Z-S50-17OR",
-      "origin": "S50",
-      "destination": "17OR",
-      "takeoff_utc": "2026-08-28T22:34:21Z",
-      "landing_utc": "2026-08-29T00:20:20Z",
-      "duration_min": 106
-    },
-    {
       "id": "2026-08-25T0118Z-S50-S50",
       "origin": "S50",
       "destination": "S50",
@@ -262,14 +198,6 @@
       "duration_min": 64
     },
     {
-      "id": "2026-08-22T2216Z-KAWO-WN33",
-      "origin": "KAWO",
-      "destination": "WN33",
-      "takeoff_utc": "2026-08-22T22:16:49Z",
-      "landing_utc": "2026-08-22T23:27:19Z",
-      "duration_min": 70
-    },
-    {
       "id": "2026-08-22T2021Z-KPWT-KAWO",
       "origin": "KPWT",
       "destination": "KAWO",
@@ -284,22 +212,6 @@
       "takeoff_utc": "2026-08-22T18:46:07Z",
       "landing_utc": "2026-08-22T18:58:26Z",
       "duration_min": 12
-    },
-    {
-      "id": "2026-08-21T0035Z-86WA-S50",
-      "origin": "86WA",
-      "destination": "S50",
-      "takeoff_utc": "2026-08-21T00:35:50Z",
-      "landing_utc": "2026-08-21T00:50:38Z",
-      "duration_min": 15
-    },
-    {
-      "id": "2026-08-19T2156Z-S50-86WA",
-      "origin": "S50",
-      "destination": "86WA",
-      "takeoff_utc": "2026-08-19T21:56:38Z",
-      "landing_utc": "2026-08-19T22:14:48Z",
-      "duration_min": 18
     },
     {
       "id": "2026-08-17T0115Z-KPWT-S50",
@@ -502,22 +414,6 @@
       "duration_min": 12
     },
     {
-      "id": "2026-07-05T1948Z-1ID3-S50",
-      "origin": "1ID3",
-      "destination": "S50",
-      "takeoff_utc": "2026-07-05T19:48:55Z",
-      "landing_utc": "2026-07-05T21:32:47Z",
-      "duration_min": 104
-    },
-    {
-      "id": "2026-07-04T1652Z-S50-1ID3",
-      "origin": "S50",
-      "destination": "1ID3",
-      "takeoff_utc": "2026-07-04T16:52:41Z",
-      "landing_utc": "2026-07-04T18:21:41Z",
-      "duration_min": 89
-    },
-    {
       "id": "2026-07-01T2014Z-KRLD-S50",
       "origin": "KRLD",
       "destination": "S50",
@@ -572,22 +468,6 @@
       "takeoff_utc": "2026-06-23T00:22:05Z",
       "landing_utc": "2026-06-23T01:20:14Z",
       "duration_min": 58
-    },
-    {
-      "id": "2026-06-20T1553Z-2WA9-83WA",
-      "origin": "2WA9",
-      "destination": "83WA",
-      "takeoff_utc": "2026-06-20T15:53:17Z",
-      "landing_utc": "2026-06-20T17:08:17Z",
-      "duration_min": 75
-    },
-    {
-      "id": "2026-06-19T2236Z-S50-WN33",
-      "origin": "S50",
-      "destination": "WN33",
-      "takeoff_utc": "2026-06-19T22:36:48Z",
-      "landing_utc": "2026-06-19T23:34:06Z",
-      "duration_min": 57
     },
     {
       "id": "2026-06-18T0059Z-S50-S50",

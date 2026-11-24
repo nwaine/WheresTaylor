@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Is Taylor Flying? · N1763W</title>
+  <title>Where's Taylor? · N1763W</title>
   <meta name="description" content="Live ADS-B tracker and PNW flight logbook for Taylor's 1973 Beechcraft A36 Bonanza (N1763W)." />
-  <meta property="og:title" content="Is Taylor Flying? · N1763W" />
+  <meta property="og:title" content="Where's Taylor? · N1763W" />
   <meta property="og:description" content="Live ADS-B tracker and PNW flight logbook for N1763W (1973 Beechcraft A36 Bonanza)." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://istaylorflying.com/" />
-  <meta property="og:image" content="https://istaylorflying.com/public/images/taylor.png" />
+  <meta property="og:image" content="https://istaylorflying.com/public/images/taylor.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='85'>✈️</text></svg>" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -344,7 +344,7 @@
 
     <section class="hero">
       <div class="hero-photo">
-        <img src="public/images/taylor.png" alt="Taylor pushing N1763W by the towbar" />
+        <img src="public/images/taylor.jpg" alt="Taylor pushing N1763W by the towbar" />
         <span class="photo-caption">PREFLIGHT TOWBAR WORKOUT · N1763W</span>
       </div>
       <div class="hero-body">
@@ -460,13 +460,13 @@
     function formatWind(raw) {
       if (!raw) return "";
       if (/calm/i.test(raw)) return "Calm winds";
-      const vrb = raw.match(/VRB\s*@\s*(\d+)(?:G(\d+))?\s*kt/i);
+      const vrb = raw.match(/VRB\s*@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?(?:\s*kt)?/i);
       if (vrb) {
         return vrb[2]
           ? `${vrb[1]} kt variable wind (gusting ${vrb[2]})`
           : `${vrb[1]} kt variable wind`;
       }
-      const m = raw.match(/(\d+)\D+@\s*(\d+)(?:G(\d+))?\s*kt/i);
+      const m = raw.match(/(\d+)\D+@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?(?:\s*kt)?/i);
       if (!m) return `Wind ${raw}`;
       const dirs = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"];
       const dir = dirs[Math.round((Number(m[1]) % 360) / 45) % 8];
@@ -478,7 +478,7 @@
     function bonanzaWindTake(raw) {
       if (!raw) return "";
       if (/calm/i.test(raw)) return "Glass-smooth — zero weather excuse for a Bonanza.";
-      const m = raw.match(/@\s*(\d+)(?:G(\d+))?\s*kt/i);
+      const m = raw.match(/@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?/i);
       if (!m) return "";
       const kt = Number(m[2] || m[1]);
       if (kt <= 8) return `${kt} kt is barely a breeze for a Bonanza (good to 17 kt crosswind).`;
