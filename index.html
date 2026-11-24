@@ -3,7 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Where's Taylor? — N1763W Live Flight Log</title>
+  <title>Is Taylor Flying? · N1763W</title>
+  <meta name="description" content="Live ADS-B tracker and PNW flight logbook for Taylor's 1973 Beechcraft A36 Bonanza (N1763W)." />
+  <meta property="og:title" content="Is Taylor Flying? · N1763W" />
+  <meta property="og:description" content="Live ADS-B tracker and PNW flight logbook for N1763W (1973 Beechcraft A36 Bonanza)." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://istaylorflying.com/" />
+  <meta property="og:image" content="https://istaylorflying.com/public/images/taylor.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='85'>✈️</text></svg>" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
@@ -268,6 +276,23 @@
       .hero-photo { min-height: 260px; }
       .stats { grid-template-columns: repeat(2, 1fr); }
     }
+
+    .logbook-toggle {
+      display: none;
+      margin: 14px auto 0;
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .logbook-toggle:hover {
+      border-color: var(--muted);
+    }
   </style>
 </head>
 <body>
@@ -358,6 +383,7 @@
         </thead>
         <tbody id="logbookBody"></tbody>
       </table>
+      <button id="logbookToggle" class="logbook-toggle" type="button"></button>
     </section>
 
     <footer>
@@ -623,6 +649,8 @@
       let totalNm = 0;
       let totalMin = 0;
       const tbody = document.getElementById("logbookBody");
+      const INITIAL_ROWS = 15;
+      const rowsHtml = [];
 
       data.flights.forEach((f) => {
         visitedCodes.add(f.origin);
@@ -634,16 +662,34 @@
         const nm = !isLocal && o && d ? haversineNm(o.lat, o.lon, d.lat, d.lon) : 0;
         totalNm += nm;
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${PT_FMT.format(new Date(f.takeoff_utc))}</td>
-          <td class="route-code">${f.origin} → ${f.destination}</td>
-          <td>${isLocal ? `${shortAirportName(o, f.origin)} (local flight)` : `${shortAirportName(o, f.origin)} → ${shortAirportName(d, f.destination)}`}</td>
-          <td>${f.duration_min} min</td>
-          <td>${isLocal ? "Local" : `${nm} NM`}</td>
-        `;
-        tbody.appendChild(tr);
+        rowsHtml.push(`
+          <tr>
+            <td>${PT_FMT.format(new Date(f.takeoff_utc))}</td>
+            <td class="route-code">${f.origin} → ${f.destination}</td>
+            <td>${isLocal ? `${shortAirportName(o, f.origin)} (local flight)` : `${shortAirportName(o, f.origin)} → ${shortAirportName(d, f.destination)}`}</td>
+            <td>${f.duration_min} min</td>
+            <td>${isLocal ? "Local" : `${nm} NM`}</td>
+          </tr>
+        `);
       });
+
+      let expanded = false;
+      const toggleBtn = document.getElementById("logbookToggle");
+      function renderLogbookRows() {
+        const slice = expanded ? rowsHtml : rowsHtml.slice(0, INITIAL_ROWS);
+        tbody.innerHTML = slice.join("");
+        if (rowsHtml.length > INITIAL_ROWS) {
+          toggleBtn.style.display = "block";
+          toggleBtn.textContent = expanded
+            ? "Show fewer flights"
+            : `Show all ${rowsHtml.length} flights`;
+        }
+      }
+      toggleBtn.addEventListener("click", () => {
+        expanded = !expanded;
+        renderLogbookRows();
+      });
+      renderLogbookRows();
 
       document.getElementById("statAirports").textContent = visitedCodes.size;
       document.getElementById("statNm").textContent = `${totalNm} NM`;
