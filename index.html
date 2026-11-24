@@ -503,10 +503,16 @@
       if (/calm/i.test(raw)) return "Glass-smooth — zero weather excuse for a Bonanza.";
       const m = raw.match(/@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?/i);
       if (!m) return "";
+      const isGust = Boolean(m[2]);
       const kt = Number(m[2] || m[1]);
-      if (kt <= 8) return `${kt} kt is barely a breeze for a Bonanza (good to 17 kt crosswind).`;
-      if (kt <= 14) return `${kt} kt is a little sporty, well inside a Bonanza's comfort zone.`;
-      if (kt <= 20) return `${kt} kt is getting spicy — right around a Bonanza's 17 kt crosswind limit.`;
+      if (kt <= 8) return `${kt} kt is barely a breeze for a Bonanza.`;
+      if (kt <= 14) return `${kt} kt is sporty, well under a Bonanza's 17 kt demonstrated crosswind.`;
+      if (kt <= 17) return `${kt} kt is getting spicy — right up near a Bonanza's 17 kt demonstrated crosswind.`;
+      if (kt <= 22) {
+        return isGust
+          ? `${kt} kt gusts are past a Bonanza's 17 kt demonstrated crosswind if it's across the runway.`
+          : `${kt} kt is past a Bonanza's 17 kt demonstrated crosswind if it's across the runway.`;
+      }
       return `${kt} kt is rowdy — good day to leave the Bonanza in the hangar.`;
     }
 
