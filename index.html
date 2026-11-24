@@ -480,40 +480,34 @@
       return a.name.replace(/\s+Airport$/i, "").replace(/\s+Municipal$/i, " Muni");
     }
 
+    function windStrength(peakKt) {
+      if (peakKt <= 6) return "Light";
+      if (peakKt <= 12) return "Mild";
+      if (peakKt <= 17) return "Breezy";
+      if (peakKt <= 23) return "Strong";
+      return "Very strong";
+    }
+
     function formatWind(raw) {
       if (!raw) return "";
       if (/calm/i.test(raw)) return "Calm winds";
       const vrb = raw.match(/VRB\s*@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?(?:\s*kt)?/i);
       if (vrb) {
+        const peak = Number(vrb[2] || vrb[1]);
+        const lvl = windStrength(peak);
         return vrb[2]
-          ? `${vrb[1]} kt variable wind (gusting ${vrb[2]})`
-          : `${vrb[1]} kt variable wind`;
+          ? `${lvl} variable wind (${vrb[1]} kt, gusting ${vrb[2]})`
+          : `${lvl} variable wind (${vrb[1]} kt)`;
       }
       const m = raw.match(/(\d+)\D+@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?(?:\s*kt)?/i);
       if (!m) return `Wind ${raw}`;
       const dirs = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"];
       const dir = dirs[Math.round((Number(m[1]) % 360) / 45) % 8];
+      const peak = Number(m[3] || m[2]);
+      const lvl = windStrength(peak);
       return m[3]
-        ? `${m[2]} kt wind from the ${dir} (gusting ${m[3]})`
-        : `${m[2]} kt wind from the ${dir}`;
-    }
-
-    function bonanzaWindTake(raw) {
-      if (!raw) return "";
-      if (/calm/i.test(raw)) return "Glass-smooth — zero weather excuse for a Bonanza.";
-      const m = raw.match(/@\s*(\d+)(?:\s*kt)?(?:\s*G(\d+))?/i);
-      if (!m) return "";
-      const isGust = Boolean(m[2]);
-      const kt = Number(m[2] || m[1]);
-      if (kt <= 8) return `${kt} kt is barely a breeze for a Bonanza.`;
-      if (kt <= 14) return `${kt} kt is sporty, well under a Bonanza's 17 kt demonstrated crosswind.`;
-      if (kt <= 17) return `${kt} kt is getting spicy — right up near a Bonanza's 17 kt demonstrated crosswind.`;
-      if (kt <= 22) {
-        return isGust
-          ? `${kt} kt gusts are past a Bonanza's 17 kt demonstrated crosswind if it's across the runway.`
-          : `${kt} kt is past a Bonanza's 17 kt demonstrated crosswind if it's across the runway.`;
-      }
-      return `${kt} kt is rowdy — good day to leave the Bonanza in the hangar.`;
+        ? `${lvl} ${dir} wind (${m[2]} kt, gusting ${m[3]})`
+        : `${lvl} ${dir} wind (${m[2]} kt)`;
     }
 
     function buildQuips({ live, metar, lastAirportObj, lastCode, homeCode, daysAgo, hoursAgo }) {
@@ -651,13 +645,9 @@
         if (metar.wind) bits.push(formatWind(metar.wind));
         document.getElementById("areaWx").textContent = bits.join(" · ");
 
-        const hintParts = [];
-        if (isFallbackWx) {
-          hintParts.push(`Reported at ${wxPlace} (${metar.station}), since ${fallbackFrom} doesn't report weather.`);
-        }
-        const windTake = bonanzaWindTake(metar.wind);
-        if (windTake) hintParts.push(windTake);
-        document.getElementById("areaWxHint").textContent = hintParts.join(" ");
+        document.getElementById("areaWxHint").textContent = isFallbackWx
+          ? `Reported at ${wxPlace} (${metar.station}), since ${fallbackFrom} doesn't report weather.`
+          : "";
       } else {
         document.getElementById("areaWx").textContent = "Live METAR on Netlify";
       }
