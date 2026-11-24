@@ -554,7 +554,13 @@
           wxNote.style.marginTop = "0";
           wxPill.insertAdjacentElement("afterend", wxNote);
         }
-        wxNote.textContent = `(pilot-speak for ${wxPlace}, ${wxPlain})`;
+        const wxStation = metar.station.toUpperCase();
+        const locCode = lastCode.toUpperCase();
+        const isFallbackWx = wxStation !== locCode && wxStation !== `K${locCode}`;
+        const fallbackFrom = lastAirportObj?.city || shortAirportName(lastAirportObj, lastCode);
+        wxNote.textContent = isFallbackWx
+          ? `(pilot-speak for ${wxPlace}, ${wxPlain} — ${fallbackFrom} doesn't report weather)`
+          : `(pilot-speak for ${wxPlace}, ${wxPlain})`;
 
         const bits = [metar.fltCat];
         if (metar.tempF !== null) bits.push(`${metar.tempF}°F`);
