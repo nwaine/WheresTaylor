@@ -148,11 +148,11 @@
       border-radius: 3px;
     }
     .hero-body {
-      padding: 26px 26px 22px;
+      padding: 24px 26px 22px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
+      gap: 18px;
     }
     .pill-row {
       display: flex;
@@ -163,11 +163,11 @@
     .status-pill {
       display: inline-block;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.11em;
       text-transform: uppercase;
-      padding: 4px 10px;
+      padding: 4px 9px;
       border-radius: 3px;
       background: #141a21;
       border: 1px solid #2b3642;
@@ -177,10 +177,10 @@
     .status-pill.airborne { color: #4ade80; }
     .wx-pill {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 4px 8px;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
       border-radius: 3px;
       border: 1.5px solid var(--ink);
       background: transparent;
@@ -189,41 +189,54 @@
     .wx-pill.MVFR { border-color: #1d5fa7; color: #1d5fa7; }
     .wx-pill.IFR, .wx-pill.LIFR { border-color: #b91c1c; color: #b91c1c; }
     .wx-pill.VFR { border-color: #0f766e; color: #0f766e; }
+    .live-meta {
+      margin-left: auto;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
     h2.headline {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       line-height: 1.2;
-      margin: 10px 0 8px;
+      margin: 14px 0 10px;
       letter-spacing: -0.02em;
     }
     .quip {
-      font-size: 1.02rem;
-      color: #2c3744;
+      font-size: 0.96rem;
+      color: #36414f;
       margin: 0;
-      padding: 12px 14px;
-      background: var(--bg);
-      border-left: 3px solid var(--sky);
-      border-radius: 6px;
+      padding: 2px 0 2px 12px;
+      border-left: 2.5px solid var(--sky);
+      line-height: 1.45;
     }
-    .live-meta {
-      margin-top: 8px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    .meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .meta-list {
+      display: flex;
+      flex-direction: column;
       gap: 12px;
-      padding-top: 12px;
+      padding-top: 14px;
       border-top: 1px solid var(--line);
-      font-size: 0.84rem;
+      font-size: 0.88rem;
     }
-    .meta-label { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; }
-    .meta-val { font-weight: 600; }
-    .meta-hint {
-      font-size: 0.76rem;
+    .meta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .meta-label {
       color: var(--muted);
-      margin-top: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .meta-val {
+      font-weight: 600;
+      color: var(--ink);
       line-height: 1.35;
+    }
+    .meta-hint {
+      font-size: 0.79rem;
+      color: var(--muted);
+      line-height: 1.4;
     }
 
     .stats {
@@ -369,28 +382,21 @@
           <div class="pill-row">
             <span id="statusPill" class="status-pill parked">CHECKING</span>
             <span id="wxPill" class="wx-pill" style="display:none"></span>
+            <span id="liveMeta" class="live-meta">Checking radar…</span>
           </div>
           <h2 id="headline" class="headline">Locating N1763W…</h2>
           <p id="quip" class="quip">Tuning 122.8 and squinting at the ADS-B feed…</p>
-          <div id="liveMeta" class="live-meta">Checking live ADS-B…</div>
         </div>
-        <div class="meta-grid">
-          <div>
-            <div class="meta-label">Last Touchdown</div>
-            <div id="lastTouchdown" class="meta-val">—</div>
-          </div>
-          <div>
-            <div class="meta-label">Most Recent Leg</div>
+        <div class="meta-list">
+          <div class="meta-row">
+            <div class="meta-label">Last Flight</div>
             <div id="lastLeg" class="meta-val">—</div>
             <div id="lastLegHint" class="meta-hint"></div>
           </div>
-          <div>
+          <div class="meta-row">
             <div class="meta-label">Area Weather</div>
             <div id="areaWx" class="meta-val">—</div>
-          </div>
-          <div>
-            <div class="meta-label">Aircraft</div>
-            <div class="meta-val">Beech A36 · IO-520</div>
+            <div id="areaWxHint" class="meta-hint"></div>
           </div>
         </div>
       </div>
@@ -622,44 +628,30 @@
 
         const wxApt = byCode.get(metar.station.toUpperCase());
         const wxPlace = shortAirportName(wxApt, metar.station);
-        const wxPlain = {
-          VFR: "clear weather",
-          MVFR: "a bit hazy, still flyable",
-          IFR: "classic PNW soup",
-          LIFR: "basically inside a cloud",
+        const wxLabel = {
+          VFR: "Clear (VFR)",
+          MVFR: "Marginal (MVFR)",
+          IFR: "Low clouds (IFR)",
+          LIFR: "Socked in (LIFR)",
         }[metar.fltCat] || metar.fltCat;
 
-        let wxNote = document.getElementById("wxNote");
-        if (!wxNote) {
-          wxNote = document.createElement("span");
-          wxNote.id = "wxNote";
-          wxNote.className = "meta-hint";
-          wxNote.style.marginTop = "0";
-          wxPill.insertAdjacentElement("afterend", wxNote);
-        }
         const wxStation = metar.station.toUpperCase();
         const locCode = lastCode.toUpperCase();
         const isFallbackWx = wxStation !== locCode && wxStation !== `K${locCode}`;
         const fallbackFrom = lastAirportObj?.city || shortAirportName(lastAirportObj, lastCode);
-        wxNote.textContent = isFallbackWx
-          ? `(pilot-speak for ${wxPlace}, ${wxPlain} — ${fallbackFrom} doesn't report weather)`
-          : `(pilot-speak for ${wxPlace}, ${wxPlain})`;
 
-        const bits = [metar.fltCat];
+        const bits = [wxLabel];
         if (metar.tempF !== null) bits.push(`${metar.tempF}°F`);
         if (metar.wind) bits.push(formatWind(metar.wind));
-        const areaWxEl = document.getElementById("areaWx");
-        areaWxEl.textContent =
-          bits.join(" · ") + (metar.note ? ` (${metar.station})` : "");
+        document.getElementById("areaWx").textContent = bits.join(" · ");
 
-        let wxHint = document.getElementById("areaWxHint");
-        if (!wxHint) {
-          wxHint = document.createElement("div");
-          wxHint.id = "areaWxHint";
-          wxHint.className = "meta-hint";
-          areaWxEl.insertAdjacentElement("afterend", wxHint);
+        const hintParts = [];
+        if (isFallbackWx) {
+          hintParts.push(`Reported at ${wxPlace} (${metar.station}), since ${fallbackFrom} doesn't report weather.`);
         }
-        wxHint.textContent = bonanzaWindTake(metar.wind);
+        const windTake = bonanzaWindTake(metar.wind);
+        if (windTake) hintParts.push(windTake);
+        document.getElementById("areaWxHint").textContent = hintParts.join(" ");
       } else {
         document.getElementById("areaWx").textContent = "Live METAR on Netlify";
       }
@@ -675,31 +667,23 @@
       document.getElementById("quip").textContent = chosen;
 
       document.getElementById("liveMeta").textContent = liveResp
-        ? `ADS-B via ${liveResp.source} · checked ${PT_FMT.format(new Date(liveResp.checked_utc))} PT`
-        : "Local preview · live ADS-B & METAR activate on Netlify";
-
-      document.getElementById("lastTouchdown").textContent = `${PT_FMT.format(lastDate)} PT`;
+        ? `Checked ${PT_FMT.format(new Date(liveResp.checked_utc))} PT`
+        : "Local preview";
 
       const newest = data.flights[0];
       if (newest) {
-        document.getElementById("lastLeg").textContent =
-          `${newest.origin} → ${newest.destination} (${newest.duration_min} min)`;
+        const origApt = byCode.get(newest.origin.toUpperCase());
+        const destApt = byCode.get(newest.destination.toUpperCase());
+        const origName = shortAirportName(origApt, newest.origin);
+        const destName = shortAirportName(destApt, newest.destination);
+        const isLocal = newest.origin.toUpperCase() === newest.destination.toUpperCase();
 
-        const fmtApt = (code) => {
-          const a = byCode.get(code.toUpperCase());
-          if (!a) return code;
-          const loc = [a.city, a.region].filter(Boolean).join(", ");
-          return `${shortAirportName(a, code)}${loc ? ` (${loc})` : ""}`;
-        };
+        document.getElementById("lastLeg").textContent = isLocal
+          ? `Local flight at ${origName} · ${newest.duration_min} min`
+          : `${origName} → ${destName} · ${newest.duration_min} min`;
 
-        const hintEl = document.getElementById("lastLegHint");
-        if (newest.origin.toUpperCase() === newest.destination.toUpperCase()) {
-          hintEl.textContent =
-            `Where the heck is ${newest.origin}? Yeah, we didn't know either. It's actually ${fmtApt(newest.origin)} — just a local loop.`;
-        } else {
-          hintEl.textContent =
-            `Where the heck are ${newest.origin} and ${newest.destination}? Yeah, we didn't know either. That's ${fmtApt(newest.origin)} to ${fmtApt(newest.destination)}.`;
-        }
+        document.getElementById("lastLegHint").textContent =
+          `${newest.origin} → ${newest.destination} · landed ${PT_FMT.format(lastDate)} PT`;
       }
 
       const visitedCodes = new Set();
@@ -749,7 +733,7 @@
       renderLogbookRows();
 
       document.getElementById("statAirports").textContent = visitedCodes.size;
-      document.getElementById("statNm").textContent = `${totalNm} NM`;
+      document.getElementById("statNm").textContent = `${totalNm.toLocaleString()} NM`;
       document.getElementById("statHours").textContent = `${(totalMin / 60).toFixed(1)} hrs`;
 
       if (data.flights.length) {
