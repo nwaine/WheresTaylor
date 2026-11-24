@@ -80,9 +80,9 @@
     header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 6px 14px;
       margin-bottom: 18px;
     }
     .brand {
@@ -92,14 +92,27 @@
       margin: 0;
     }
     .tail-tag {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .tail-num {
       font-weight: 700;
       color: var(--ink);
-      border: 1.5px solid var(--ink);
-      padding: 3px 9px;
-      border-radius: 3px;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .tail-sep {
+      width: 1px;
+      height: 14px;
+      background: #d5d0c5;
+      display: inline-block;
+    }
+    .tail-model {
+      font-weight: 400;
+      color: var(--muted);
     }
     .hero {
       display: grid;
@@ -339,7 +352,11 @@
   <div class="wrap">
     <header>
       <h1 class="brand">Where's Taylor?</h1>
-      <span class="tail-tag">N1763W · '73 BEECH A36 BONANZA</span>
+      <div class="tail-tag">
+        <span class="tail-num">N1763W</span>
+        <span class="tail-sep" aria-hidden="true"></span>
+        <span class="tail-model">1973 Beechcraft A36 Bonanza</span>
+      </div>
     </header>
 
     <section class="hero">
